@@ -1,0 +1,354 @@
+library(ggtree)
+library(ggtreeExtra)
+library(ape)
+library(dplyr)
+library(tidyr)
+library(phytools)
+library(ggplot2)
+library(tidytree)
+library(magick)
+
+
+tree     = read.tree("Data/1672taxa_290genes_bb_1.treefile")
+outgroup = read.delim("Data/outgroup2.txt", header = FALSE)
+taxonomy = read.delim("Data/taxonomy.txt")
+
+taxonomy = as.data.frame(taxonomy)
+taxonomy$lifestyle = as.factor(taxonomy$lifestyle)
+
+lifestyles = taxonomy[, 1:2]
+lifestyles$lifestyle = as.factor(lifestyles$lifestyle)
+row.names(lifestyles) = lifestyles$species
+
+taxonomy = as.data.frame(unclass(taxonomy), stringsAsFactors=TRUE)
+
+
+rooted_tree <- root(tree, outgroup = "Mus_musculus", resolve.root = TRUE, keep.root.edge = FALSE, edgelabel = TRUE)  # Replace with your outgroup
+rooted_tree = drop.tip(rooted_tree, tip = c(outgroup$V1), trim.internal = TRUE)
+
+
+remove = subset(lifestyles, lifestyle == "Unknown" | lifestyle == "" | lifestyle == "Mycoparasite" | is.na(lifestyle))
+rooted_tree = drop.tip(rooted_tree, tip = remove$id, trim.internal = TRUE)
+
+
+taxonomy = subset(taxonomy, Kingdom.name == "Fungi" | Kingdom.name == "Cristidiscoidea")
+taxonomy = droplevels(taxonomy)
+
+all_groups <- unique(taxonomy$Phylum.name)
+color_palette <- setNames(rainbow(length(all_groups)), all_groups)
+
+
+tree_plot = ggtree(rooted_tree, layout = "circular", branch.length = "edge.length", size = 1) %<+% taxonomy +
+  geom_tree(aes(color = Phylum.name), size = 1) +
+  scale_color_manual(values = color_palette) +
+  theme(plot.margin = margin(t = 0, r = -1, b = 0, l = -2, unit = "in")) 
+
+tree_plot
+
+
+
+tree_fig1_nodes = ggtree(rooted_tree, layout = "rectangular", branch.length = "edge.length", size = 1)%<+% taxonomy +
+  geom_tree(aes(color = Phylum.name), size = 0.5) +
+  scale_color_manual(values = color_palette) + 
+  geom_text(aes(label=node), size=2.5, hjust = 1.5, vjust=-0.5) +
+  geom_tiplab(aes(label=Phylum.name), size = 2)
+
+pdf("Figures/fig1nodes.pdf", 	width = 20, height = 50)
+tree_fig1_nodes
+dev.off()
+
+
+#### Figure 1 ####
+tree_fig1 = ggtree(rooted_tree, layout = "circular", branch.length = "edge.length") %<+% taxonomy +
+  geom_tree(colour = "black") +
+  theme(plot.margin = margin(t = 0, r = -1, b = 0, l = -2, unit = "in")) 
+
+tree_fig1 = rotate_tree(tree_fig1, -10)
+
+
+pdf("Figures/Fig1_raw.pdf", 	width = 10, height = 11.7, useDingbats = TRUE)
+
+gheatmap(tree_fig1, lifestyles_simple, width=0.05, 
+         colnames=FALSE, offset = -0.1) +
+  theme(legend.position = "bottom") +
+  scale_x_ggtree() + 
+  scale_y_continuous(expand=c(0, 2)) +
+  scale_fill_manual(name = "Life mode",
+                    values = c("Saprotrophic" = "#FFCB77",
+                               "Plant pathogen" = "#4CAF50",
+                               "Animal pathogen" = "#DB2763", 
+                               "Symbiotic" = "#07070A", 
+                               "Entomopathogenic"  = "#9EEFE5",
+                               "Mycorrhizal"  = "#1B5299",
+                               "Unknown" = "white"),
+                    na.value = "white") +
+  guides(colour="none") + 
+  geom_cladelabel(node = 920, label = "Ascomycota", angle = 0, barsize = NA, hjust = 0.8, vjust = 3, offset = -0.4, fontface = 2, fontsize = 6) +
+  geom_cladelabel(node = 1469, label = "Basidiomycota", angle = 0, barsize = NA, hjust = 1.3, offset = 0.5, fontface = 2, fontsize = 6) +
+  geom_cladelabel(node = 1758, label = "Mucoromycota", angle = 10, barsize = NA, hjust = -0.7,vjust = 0.9, offset = 0.2, fontface = 2, fontsize = 4) +
+  geom_cladelabel(node = 1789, label = "Zoopagomycota", angle = 6, barsize = NA, vjust = 0.2, offset = 0.9, fontsize = 2.5, fontface = 2) +
+  geom_cladelabel(node = 1795, label = "Chytridiomycota", angle = 5, barsize = NA, vjust = -0.1, offset = 1.15, fontsize = 2.5, fontface = 2) +
+  geom_cladelabel(node = 1807, label = "Blastocladiomycota", angle = 0, barsize = NA, vjust = -0.5, offset = 1.5, fontsize = 2.5, fontface = 2) +
+  geom_cladelabel(node = 1810, label = "Microsporidia", angle = 0, barsize = NA, vjust = -1.5, offset = -0.6, fontsize = 2.5, fontface = 2) +
+  geom_cladelabel(node = 712, label = "Cryptomycota", angle = -8, barsize = NA, vjust = 1.3, offset = 1.7, fontsize = 2.5, fontface = 2) +
+  geom_highlight(node = 920, alpha = 1, fill="lightyellow", to.bottom = TRUE, extend = 1) +
+  geom_highlight(node = 1469, alpha = 0.30, fill="lightskyblue", to.bottom = TRUE, extend = 1.7) +
+  geom_highlight(node = 1758, alpha = 0.25, fill="salmon", to.bottom = TRUE, extend = 2.2) +
+  geom_highlight(node = 1789, alpha = 0.30, fill="green3", to.bottom = TRUE, extend = 2.1) +
+  geom_highlight(node = 1795, alpha = 0.30, fill="mediumorchid", to.bottom = TRUE, extend = 2.4) +
+  geom_highlight(node = 1807, alpha = 0.8, fill="midnightblue", to.bottom = TRUE, extend = 2.4) +
+  geom_highlight(node = 1810, alpha = 0.30, fill="orange", to.bottom = TRUE, extend = 0.1) +
+  geom_highlight(node = 712, alpha = 0.8, fill="darkmagenta", to.bottom = TRUE, extend = 2.4) +
+  geom_tiplab(aes(label = ifelse(label == "Zymoseptoria_tritici", "Zymoseptoria tritici", NA), fontface = 4),
+              color = "#4CAF50", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Ustilago_maydis", "Ustilago maydis", NA), fontface = 4), 
+              color = "#4CAF50", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Magnaporthe_oryzae", "Magnaporthe oryzae", NA), fontface = 4),
+              color = "#4CAF50", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Botrytis_cinerea", "Botrytis cinerea", NA), fontface = 4), 
+              color = "#4CAF50", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Colletotrichum_graminicola", "Colletotrichum graminicola", NA), fontface = 4),
+              color = "#4CAF50", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Puccinia_triticina", "Puccinia triticina", NA), fontface = 4),
+              color = "#4CAF50", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Alternaria_alternata", "Alternaria alternata", NA), fontface = 4),
+              color = "#4CAF50", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Fusarium_graminearum", "Fusarium graminearum", NA), fontface = 4), 
+              color = "#4CAF50", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Puccinia_triticina", "Puccinia triticina", NA), fontface = 4),
+              color = "#4CAF50", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Rhizoctonia_solani", "Rhizoctonia solani", NA), fontface = 4), 
+              color = "#4CAF50", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Pyrrhoderma_noxium", "Pyrrhoderma noxium", NA), fontface = 4), 
+              color = "#4CAF50", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Choanephora_cucurbitarum", "Choanephora cucurbitarum", NA), fontface = 4),
+              color = "#4CAF50", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Tilletia_caries", "Tilletia caries", NA), fontface = 4),
+              color = "#4CAF50", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Cryptococcus_neoformans", "Cryptococcus neoformans", NA), fontface = 4),
+              color = "#DB2763", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Candida_albicans", "Candida albicans", NA), fontface = 4),
+              color = "#DB2763", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Cordyceps_cicadae", "Cordyceps cicadae", NA), fontface = 4),
+              color = "dodgerblue", size = 4, offset = 0.05) +
+  geom_tiplab(aes(label = ifelse(label == "Metarhizium_brunneum", "Metarhizium brunneum", NA), fontface = 4),
+              color = "dodgerblue", size = 4, offset = 0.05)
+
+
+dev.off()
+
+
+#### Figure 2 ####
+library(gridExtra)
+
+phytopathogens = read.delim("Data/Table_Fig2.txt")
+
+
+phytopathogens_list = subset(taxonomy, id == "Blumeria_graminis" | 
+                               id == "Bipolaris_maydis" | 
+                               id == "Colletotrichum_graminicola" |
+                               id == "Fusarium_graminearum" |
+                               id == "Fusarium_oxysporum" |
+                               id == "Magnaporthe_oryzae" |
+                               id == "Puccinia_triticina" |
+                               id == "Pyrenophora_tritici-repentis" |
+                               id == "Rhizoctonia_solani" |
+                               id == "Tilletia_indica" |
+                               id == "Ustilago_maydis" |
+                               id == "Zymoseptoria_tritici" |
+                               id == "Alternaria_alternata" |
+                               id == "Parastagonospora_nodorum" |
+                               id == "Verticillium_dahliae" |
+                               id == "Macrophomina_phaseolina")
+
+phytopathogens_list$id = as.character(phytopathogens_list$id)
+phytopathogens_list = as.data.frame(phytopathogens_list)
+
+rooted_tree2 = keep.tip(rooted_tree, tip = phytopathogens_list$id, trim.internal = TRUE )
+
+
+phytopatho_tree = ggtree(rooted_tree2) 
+phytopatho_tree = phytopatho_tree %<+% phytopathogens_list + 
+  geom_tiplab(aes(label = factor(species)), size = 4, fontface = "italic")
+
+
+
+phytopatho_tree + xlim(0, 1.9) 
+
+
+phytopathogens_plotting = phytopathogens
+rownames(phytopathogens_plotting) = phytopathogens_plotting$id
+phytopathogens_plotting = as.data.frame(phytopathogens_plotting)
+
+phytopathogens_plotting$LifestyleLabel[phytopathogens_plotting$Lifestyle == "Hemibiotroph"] <- "H"
+phytopathogens_plotting$LifestyleLabel[phytopathogens_plotting$Lifestyle == "Necrotrophic"] <- "N"
+phytopathogens_plotting$LifestyleLabel[phytopathogens_plotting$Lifestyle == "Biotroph"] <- "B"
+phytopathogens_plotting$LifestyleLabel[phytopathogens_plotting$Lifestyle == "Obligate biotroph"] <- "OB"
+
+
+
+tree1 = phytopatho_tree + 
+  geom_facet(panel = "Lifestyle",
+             data = phytopathogens_plotting,
+             geom = geom_text,
+             aes(x = 1, label = LifestyleLabel, colour = Lifestyle, fontface = "bold"),
+             size = 5)
+
+
+tree1 = tree1 + geom_facet(panel = "Haustorium",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Haustorium),
+                           shape = 21, colour = "black",
+                           size = 5) 
+
+
+tree1 = tree1 + geom_facet(panel = "Appressorium",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Appressorium),
+                           shape = 21, colour = "black",
+                           size = 5) 
+
+
+tree1 = tree1 + geom_facet(panel = "Conidia",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Conidia),
+                           shape = 21, colour = "black",
+                           size = 5)
+
+
+tree1 = tree1 + geom_facet(panel = "Uredinia",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Uredinia),
+                           shape = 21, colour = "black",
+                           size = 5)
+
+
+tree1 = tree1 + geom_facet(panel = "Host\nspecificity",
+                           data = phytopathogens_plotting,
+                           geom = geom_text,
+                           aes(x = 1, label = Host.Specificity, colour = Host.Specificity, fontface = "bold"),
+                           size = 5)
+
+
+tree1 = tree1 + geom_facet(panel = "Wheat",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Wheat),
+                           shape = 21, colour = "black",
+                           size = 5)
+
+
+tree1 = tree1 + geom_facet(panel = "Barley",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Barley),
+                           shape = 21, colour = "black",
+                           size = 5) 
+
+
+tree1 = tree1 + geom_facet(panel = "Maize.Corn",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Maize.Corn),
+                           shape = 21, colour = "black",
+                           size = 5) 
+
+
+tree1 = tree1 + geom_facet(panel = "Oat",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Oat),
+                           shape = 21, colour = "black",
+                           size = 5)
+
+
+tree1 = tree1 + geom_facet(panel = "Rye",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Rye),
+                           shape = 21, colour = "black",
+                           size = 5) 
+
+tree1 = tree1 + geom_facet(panel = "Rice",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Rice),
+                           shape = 21, colour = "black",
+                           size = 5)
+
+tree1 = tree1 + geom_facet(panel = "Other.cereals",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Other.cereals),
+                           shape = 21, colour = "black",
+                           size = 5) 
+
+
+tree1 = tree1 + geom_facet(panel = "Grasses",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Grasses),
+                           shape = 21, colour = "black",
+                           size = 5) 
+
+
+tree1 = tree1 + geom_facet(panel = "Legumes",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Legumes),
+                           shape = 21, colour = "black",
+                           size = 5) 
+
+tree1 = tree1 + geom_facet(panel = "Vegetables",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Vegetables),
+                           shape = 21, colour = "black",
+                           size = 5)
+
+tree1 = tree1 + geom_facet(panel = "Fruits",
+                           data = phytopathogens_plotting,
+                           geom = geom_point,
+                           aes(x = 1, fill = Fruits),
+                           shape = 21, colour = "black",
+                           size = 5) +
+  scale_fill_manual(name = "", values = c("Yes" = "#4D4D4D", "No" = "white")) +
+  scale_x_ggtree() +
+  theme(legend.position = "none",
+        strip.text = element_text(angle = 45, size = 12),
+        strip.background = element_blank())
+
+
+
+
+
+
+tree2 = tree1 + xlim(0, 3) 
+
+
+pdf("Figures/Fig2_raw.pdf", width = 8.3, height = 4.5)
+
+facet_widths(tree2, c(Tree = 3, 
+                      "Lifestyle" = 0.2, 
+                      "Haustorium" = 0.2, 
+                      "Appressorium" = 0.2, 
+                      "Conidia" = 0.2, 
+                      "Uredinia" = 0.2,
+                      "Host\nspecificity" = 0.2,
+                      "Wheat" = 0.2,
+                      "Barley" = 0.2,
+                      "Maize.Corn" = 0.2,
+                      "Oat" = 0.2,
+                      "Rye" = 0.2,
+                      "Rice" = 0.2,
+                      "Other.cereals" = 0.2,
+                      "Grasses" = 0.2,
+                      "Legumes" = 0.2,
+                      "Fruits" = 0.2,
+                      "Vegetables" = 0.2))
+
+dev.off()

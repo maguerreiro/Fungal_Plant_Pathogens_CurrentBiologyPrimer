@@ -1,0 +1,19 @@
+id	species	Lifestyle	Appressorium	Haustorium	Conidia	Uredinia	Host Specificity	Barley	Maize/Corn	Wheat	Oat	Rye	Rice	Other cereals	Grasses	Legumes	Fruits	Vegetables
+Blumeria_graminis	Blumeria graminis f. sp. hordei	Obligate biotroph	Yes	Yes	No	No	Specific	Yes	No	No	No	No	No	No	No	No	No	No
+Bipolaris_maydis	Bipolaris maydis	Necrotrophic	No	No	Yes	No	Specific	No	Yes	No	No	No	No	No	No	No	No	No
+Bipolaris_sorokiniana	Bipolaris sorokiniana	Hemibiotroph	Yes	No	Yes	No	Broad	Yes	Yes	Yes	Yes	Yes	No	Yes	Yes	No	No	No
+Colletotrichum_graminicola	Colletotrichum graminicola	Hemibiotroph	Yes	No	Yes	No	Broad	No	Yes	No	No	No	No	Yes	Yes	No	No	No
+Fusarium_graminearum	Fusarium graminearum	Hemibiotroph	Yes	No	No	No	Broad	Yes	Yes	Yes	Yes	No	Yes	No	No	No	No	No
+Fusarium_oxysporum	Fusarium oxysporum	Hemibiotroph	No	No	Yes	No	Broad	No	No	No	No	No	No	No	No	Yes	Yes	No
+Fusarium_verticillioides	Fusarium verticillioides	Hemibiotroph	No	No	Yes	No	Broad	No	Yes	Yes	No	No	Yes	Yes	No	Yes	Yes	No
+Magnaporthe_oryzae	Magnaporthe oryzae	Hemibiotroph	Yes	No	No	No	Broad	Yes	No	Yes	No	Yes	Yes	Yes	No	No	No	No
+Puccinia_triticina	Puccinia triticina	Obligate biotroph	Yes	Yes	No	Yes	Specific	No	No	Yes	No	No	No	No	No	No	No	No
+Pyrenophora_tritici-repentis	Pyrenophora tritici-repentis	Necrotrophic	Yes	No	Yes	No	Specific	No	No	Yes	No	No	No	No	No	No	No	No
+Rhizoctonia_solani	Rhizoctonia solani	Necrotrophic	Yes	No	No	No	Broad	No	Yes	No	No	No	Yes	No	No	Yes	No	Yes
+Tilletia_indica	Tilletia indica	Hemibiotroph	Yes	No	No	No	Specific	No	No	Yes	No	No	No	No	No	No	No	No
+Ustilago_maydis	Ustilago maydis	Biotroph	Yes	No	No	No	Specific	No	Yes	No	No	No	No	No	No	No	No	No
+Zymoseptoria_tritici	Zymoseptoria tritici	Hemibiotroph	No	No	Yes	No	Specific	No	No	Yes	No	No	No	No	No	No	No	No
+Alternaria_alternata	Alternaria alternata	Necrotrophic	Yes	No	Yes	No	Broad	No	No	No	No	No	No	No	No	Yes	Yes	Yes
+Parastagonospora_nodorum	Parastagonospora nodorum	Necrotrophic	No	No	Yes	No	Specific	No	No	Yes	No	No	No	No	No	No	No	No
+Verticillium_dahliae	Verticillium dahliae	Hemibiotroph	Yes	No	Yes	No	Broad	No	No	No	No	No	No	No	No	Yes	Yes	Yes
+Macrophomina_phaseolina	Macrophomina phaseolina	Hemibiotroph	No	No	Yes	No	Broad	No	No	Yes	No	No	No	Yes	No	Yes	Yes	Yes
